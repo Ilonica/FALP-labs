@@ -68,3 +68,13 @@ brothers(X):- brothers(Y,X), print(Y), nl, fail.
 b_s(X,Y):- (man(X), man(Y); man(X), woman(Y); woman(X), woman(Y)), parent(Z,X), parent(Z,Y), X\=Y.
 %Предикат, который выводит всех братьев или сестер X.
 b_s(X):- b_s(Y,X), print(Y), nl, fail.
+
+%Предикат, который проверяет, является ли X отцом Y.
+father(X,Y):-man(X), parent(X,Y).
+%Предикат, который выводит отца X.
+father(X):-father(Y,X), print(Y), nl, fail.
+
+%Предикат, который проверяет, является ли X женой Y.
+wife(X,Y):-woman(X), man(Y), parent(X,Z), parent(Y,Z), X\=Y.
+%Передикат, который выводит жену X.
+wife(X):-wife(Y,X), print(Y), nl, fail.
