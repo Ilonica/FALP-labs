@@ -78,3 +78,42 @@ father(X):-father(Y,X), print(Y), nl, fail.
 wife(X,Y):-woman(X), man(Y), parent(X,Z), parent(Y,Z), X\=Y.
 %Передикат, который выводит жену X.
 wife(X):-wife(Y,X), print(Y), nl, fail.
+
+% Решение с использованием только базы фактов
+% Предикат, который проверяет, является ли X внучкой Y.
+grand_da(X,Y):- woman(X), parent(Y,Z), parent(Z,X).
+% Передикат, который выводит всех внучек X.
+grand_dats(X):- grand_da(Y,X), print(Y), nl, fail.
+
+% Предикат, который проверяет, является ли X и Y дедушкой и внучкой или
+% наоборот.
+grand_pa_and_da(X,Y):- man(X), woman(Y), parent(X,Z), parent(Z,Y); man(Y), woman(X), parent(Y,Z), parent(Z,X).
+
+% Предикат, который проверяет, является ли X тетей Y.
+aunt(X,Y):- woman(X), parent(Z,D), parent(Z,X), parent(D,Y), D\=X.
+% Передикат, который выводит всех теть X.
+aunt(X):- aunt(Y,X), print(Y), nl, fail.
+
+% Решение с использованием вспомогательных предикатов
+% Предикат, который проверяет, являеттся ли Y дочкой X.
+daughter(X,Y):- woman(Y), parent(X,Y).
+% Предикат, который проверяет, является ли X внучкой Y.
+grand_da1(X,Y):- parent(Y,Z), daughter(Z,X).
+% Передикат, который выводит всех внучек X.
+grand_dats1(X):- grand_da1(Y,X), print(Y), nl, fail.
+
+% Предикат, который проверяет, является ли X и Y дедушкой и внучкой.
+grand_fa_and_da(X,Y):- father(X,Z), daughter(Z,Y).
+% Предикат, который проверяет, является ли X и Y внучкой и дедушкой.
+grand_da_and_fa(X,Y):- father(Y,Z), daughter(Z,X).
+% Предикат, который проверяет, является ли X и Y дедушкой и внучкой или
+% наоборот.
+grand_pa_and_da1(X,Y):- grand_fa_and_da(X,Y); grand_da_and_fa(X,Y).
+
+% Предикат, который проверяет, является ли X и Y братом и сестрой или
+% сестрами.
+brother_and_sister(X,Y):- woman(Y), parent(Z,Y), parent(Z,X).
+% Предикат, который проверяет, является ли X тетей Y.
+aunt1(X,Y):- brother_and_sister(D,X), parent(D,Y), D\=X.
+% Передикат, который выводит всех теть X.
+aunt1(X):- aunt1(Y,X), print(Y), nl, fail.
