@@ -1,13 +1,12 @@
 :- dynamic asked/2.
 
-% Основной предикат.
-main :-
+% Основной предикат
+main:-
     retractall(asked(_,_)),
-    findall(Question, question(_, Question), Questions),
-    maplist(request, Questions),
-    find_character(Character),
+    findall(Char, character(Char, _), Characters),
+    identify(Characters, Res),
     nl,
-    write('Скорее всего вы загадали '), write(Character), write('.'), nl.
+    write('Скорее всего вы загадали '), write(Res), write('.'), nl.
 main :-
     nl,
     write('Система не смогла угадать персонажа.'), nl.
@@ -43,23 +42,37 @@ character(кокоми, [hair-n, eyes-n, age-y, gender-y, arhont-n, fatui-n]).
 character(паймон, [hair-n, eyes-n, age-n, gender-y, arhont-n, fatui-n]).
 character(син_цю, [hair-n, eyes-y, age-n, gender-n, arhont-n, fatui-n]).
 
+
+% Рекурсивный предикат,который идентифицирует персонажа, задавая
+% последовательно вопросы о его характеристиках и запрашивая ответы.
+% identify(+[Character], +Character)
+identify([Character], Character):- !.
+identify(Characters, Result):-
+    question(Fact, Text),
+    not(asked(Fact, _)),
+    request(question(Fact, Text), Reply),
+    update_characters(Characters, question(Fact, _), Reply, RefreshdCharacters),
+    identify(RefreshdCharacters, Result).
+
 % Предикат, который задает вопрос пользователю и записывает ответы.
-% request(+Question)
-request(Question) :-
-    write(Question), write(' (y/n)? '),
-    read(Reply),
-    assert(asked(Question, Reply)).
+% request(question(+Fact, +Text), +Reply)
+request(question(Fact, Text), Reply) :-
+    (asked(Fact, Reply) -> true;
+     nl, write(Text), write(' (y/n)? '),
+     read(Reply),
+     assert(asked(Fact, Reply))
+    ).
 
-% Предикаты для определения персонажа на основе ответов пользователя.
-% find_character(+Character)
-find_character(Character) :-
+% Предикат для обновления списка возможных персонажей. Он исключает тех,
+% у кого не совпадает текущий ответ на вопрос с имемеющимся.
+% update_characters(+Characters, question(+Fact), +Reply,
+% +RefreshdCharacters)
+update_characters(Characters, question(Fact, _), Reply, RefreshdCharacters) :-
+    include(match(Fact, Reply), Characters, RefreshdCharacters).
+
+% Предикат, который проверяет совпадаетли ли ответ на вопрос с ожидаемым
+% ответом для данного факта.
+% match(+Fact, +Answer, +Character)
+match(Fact, Answer, Character) :-
     character(Character, Traits),
-    check_traits(Traits).
-
-check_traits([]).
-% check_traits([+Trait|-T])
-check_traits([Trait|T]) :-
-    question(Fact, Question),
-    Trait = Fact-Answer,
-    asked(Question, Answer),
-    check_traits(T).
+    member(Fact-Answer, Traits).
