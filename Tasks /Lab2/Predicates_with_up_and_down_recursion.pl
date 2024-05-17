@@ -1,3 +1,4 @@
+% Задание 1
 % Предикат, который находит максимальное число из X, Y, Z
 % max(+X, +Y, +U, -Z)
 max(X, Y, U, X) :- X>Y, X>U, !.
@@ -83,3 +84,93 @@ main :-
     write(Sum), nl,
     del_items_with_sum_digits_of_X([17, 5, 28, 9, 157], 8, Result),
     write(Result).
+
+
+% Задание 2
+% Предикат, который находит произведение цифр числа (рекурсия вверх)
+% mult_cifr_up(+X, -SummCifr)
+mult_cifr_up(0,1):-!.
+mult_cifr_up(X,SummCifr):-X1 is X // 10, Ost is X mod 10,
+	mult_cifr_up(X1, SummCifr1), SummCifr is SummCifr1 * Ost.
+
+% Предикат, который находит произведение цифр числа (рекурсия вниз)
+% mult_cifr_down(+X, -SummCifr)
+mult_cifr_down(X, SummCifr) :-
+    mult_cifr_down(X, 1, SummCifr).
+% Базовый случай: когда число равно 0, возвращаем аккумулированное произведение
+mult_cifr_down(0, Acc, Acc) :- !.
+% Рекурсивный случай: умножаем аккумулированное произведение на последнюю цифру и продолжаем с оставшейся частью числа
+mult_cifr_down(X, Acc, SummCifr) :-
+    X > 0,
+    LastDigit is X mod 10,
+    NewAcc is Acc * LastDigit,
+    Rest is X // 10,
+    mult_cifr_down(Rest, NewAcc, SummCifr).
+
+
+% Предикат, который находит макcимальную цифру числа, не делящуюся на
+% 3 (рекурсия вверх)
+% max_digit_not_div_by_3_up(+N, -Max)
+max_digit_not_div_by_3_up(N, Max) :-
+    N > 0,
+    max_digit_not_div_by_3_up(N, 0, Max).
+max_digit_not_div_by_3_up(N, Acc, Max) :-
+    D is N mod 10,
+    (D mod 3 =\= 0 ->
+        Max1 is max(Acc, D);
+        Max1 = Acc),
+    N1 is N // 10,
+    (N1 > 0 ->
+        max_digit_not_div_by_3_up(N1, Max1, Max);
+        Max = Max1).
+
+% Предикат, который находит макcимальную цифру числа, не делящуюся на
+% 3 (рекурсия вниз)
+% max_digit_not_div_by_3_down(+N, -Max)
+max_digit_not_div_by_3_down(N, Max) :-
+    max_digit_not_div_by_3_down(N, 0, Max).
+max_digit_not_div_by_3_down(0, Max, Max).
+max_digit_not_div_by_3_down(N, Acc, Max) :-
+    D is N mod 10,
+    (D mod 3 =\= 0 ->
+        Max1 is max(Acc, D);
+        Max1 = Acc),
+    N1 is N // 10,
+    max_digit_not_div_by_3_down(N1, Max1, Max).
+
+
+% Предикат, который находит количество делителей числа (рекурсия вверх)
+% count_divisors_up(+N, ?Count)
+count_divisors_up(N, Count) :-
+    count_divisors_up(N, 1, Count).
+% count_divisors_up(+N, +Divisor, -Count).
+count_divisors_up(N, Divisor, Count) :-
+    Divisor > N // 2,
+    Count is 1.
+count_divisors_up(N, Divisor, Count) :-
+    Divisor =< N // 2,
+    (N mod Divisor =:= 0 ->
+        NextDivisor is Divisor + 1,
+        count_divisors_up(N, NextDivisor, Count1),
+        Count is Count1 + 1
+    ;
+        NextDivisor is Divisor + 1,
+        count_divisors_up(N, NextDivisor, Count)
+    ).
+
+
+% Предикат, который находит количество делителей числа (рекурсия вниз)
+% count_divisors_down(+N, ?Count)
+count_divisors_down(N, Count) :-
+    count_divisors_down(N, 1, Count).
+% count_divisors_down(+N, +Divisor, -Count)
+count_divisors_down(N, Divisor, Count) :-
+    (Divisor > N ->
+        Count is 0;
+        (N mod Divisor =:= 0 ->
+            NextDivisor is Divisor + 1,
+            count_divisors_down(N, NextDivisor, Count1),
+            Count is Count1 + 1;
+            NextDivisor is Divisor + 1,
+            count_divisors_down(N, NextDivisor, Count))).
+
