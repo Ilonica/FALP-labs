@@ -152,12 +152,9 @@ count_divisors_up(N, Divisor, Count) :-
     (N mod Divisor =:= 0 ->
         NextDivisor is Divisor + 1,
         count_divisors_up(N, NextDivisor, Count1),
-        Count is Count1 + 1
-    ;
+        Count is Count1 + 1;
         NextDivisor is Divisor + 1,
-        count_divisors_up(N, NextDivisor, Count)
-    ).
-
+        count_divisors_up(N, NextDivisor, Count)).
 
 % Предикат, который находит количество делителей числа (рекурсия вниз)
 % count_divisors_down(+N, ?Count)
@@ -173,4 +170,92 @@ count_divisors_down(N, Divisor, Count) :-
             Count is Count1 + 1;
             NextDivisor is Divisor + 1,
             count_divisors_down(N, NextDivisor, Count))).
+
+
+% Задание 3
+% Задача 4) Дан целочисленный массив. Вывести индексы массива в том
+% порядке, в котором соответствующие им элементы образуют убывающую
+% последовательность.
+
+% Предикат, который присваивает индексы массиву
+% assign_indexes(+Array, -ArrayInd)
+assign_indexes(Array, ArrayInd) :-
+    assign_indexes(Array, 1, ArrayInd).
+% assign_indexes(+[], +_, -[]).
+assign_indexes([], _, []).
+assign_indexes([H|T], Index, [(Index,H)|IndexT]) :-
+    NewIndex is Index + 1,
+    assign_indexes(T, NewIndex, IndexT).
+% Предикат, который получает убывающую последовательность
+% decreasing_sequence(+[], -[])
+decreasing_sequence([], []).
+decreasing_sequence(Array, Indexes) :-
+    sort(2, @>=, Array, SortedArray),
+    extract_indexes(SortedArray, Indexes).
+% Предикат, который извлекает индексы из списка пар
+% extract_indexes(+[], -[]).
+extract_indexes([], []).
+extract_indexes([(Index, _) | Rest], [Index | RestInd]) :-
+    extract_indexes(Rest, RestInd).
+% Основной предикат
+% assign_and_output_indexes(+Array, ?Indexes)
+assign_and_output_indexes(Array, Indexes) :-
+    assign_indexes(Array, ArrayInd),
+    decreasing_sequence(ArrayInd, Indexes).
+
+
+
+% Задача 21) Дан целочисленный массив. Необходимо найти элементы,
+% расположенные после первого максимального.
+
+% Предикат, который находит максимальный элемент в списке
+% find_max(+[X|Xs], -Max)
+find_max([X|Xs], Max) :-
+    find_max(Xs, X, Max).
+% Базовый случай: если список пуст, текущий максимальный элемент
+% остается максимальным. find_max(+[], -Max, -Max)
+find_max([], Max, Max).
+% Предикат, который сравнивает текущий элемент X с текущим максимальным значением CurrentMax и обновляет максимальное значение, если X больше
+find_max([X|Xs], CurrentMax, Max) :-
+    X > CurrentMax,
+    find_max(Xs, X, Max).
+find_max([Y|Xs], CurrentMax, Max) :-
+    Y =< CurrentMax,
+    find_max(Xs, CurrentMax, Max).
+% Основной предикат
+% find_elements_after_max(+List, ?Element)
+list_after_the_max_number(List, Element) :-
+    find_max(List, Max),
+    append(_, [Max|Element], List).
+
+
+
+% Задача 32) Дан целочисленный массив. Найти количество его локальных
+% максимумов.
+
+% Базовый случай для пустого списка
+% number_of_local_maxima(+[], ?Count, ?Count)
+number_of_local_maxima([], Count, Count).
+% Рекурсивный предикат для проверки локального максимума
+number_of_local_maxima([H|T], Count, Result) :-
+    number_of_local_maxima(T, Count, Result1),
+    local_maximum(H, T),
+    Result is Result1 + 1.
+% Рекурсивный предикат, для текущего элемента, который не является
+% локальным максимумом
+number_of_local_maxima([_|T], Count, Result) :-
+    number_of_local_maxima(T, Count, Result).
+% Предикат, который проверяет, является ли элемент локальным
+% максимумом
+% local_maximum(+Num, +[H|_])
+local_maximum(Num, [H|_]) :-
+    Num > H.
+local_maximum(Num, [H1, H2|_]) :-
+    Num > H1,
+    Num > H2.
+local_maximum(_, []).
+% Основной предикат
+% number_of_local_maxima(+Array, ?Count)
+number_of_local_maxima(Array, Count) :-
+    number_of_local_maxima(Array, 0, Count).
 
